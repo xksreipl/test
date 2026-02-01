@@ -1,0 +1,34 @@
+<?php
+/**
+ * Skrypt pobierający kod strony z Google Drive i wyświetlający go.
+ * Pamiętaj, aby plik na dysku miał uprawnienia: "Każdy mający link może wyświetlać".
+ */
+
+// Twoje ID pliku z linku
+$fileId = '1pEI29GoFQdwzm9O8_FXthbnGpvwaSFRI';
+
+// Link do bezpośredniego pobierania (omija podgląd Drive)
+$url = "https://docs.google.com/uc?export=download&id=1pEI29GoFQdwzm9O8_FXthbnGpvwaSFRI" . $fileId;
+
+// Inicjalizacja cURL dla stabilnego połączenia
+$ch = curl_init();
+curl_setopt($ch, CURLOPT_URL, $url);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true); // Pozwala na przekierowania Google
+curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); // Omija ewentualne problemy z certyfikatem SSL na niektórych serwerach
+curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36');
+
+$remoteCode = curl_exec($ch);
+$httpCode = curl_getinfo($ch, HTTP_CODE);
+curl_close($ch);
+
+// Sprawdzanie, czy pobieranie się powiodło
+if ($httpCode == 200 && $remoteCode !== false) {
+    // Wyświetla kod HTML/JS/CSS pobrany z dysku
+    echo $remoteCode;
+} else {
+    // Komunikat o błędzie w przypadku problemów z dostępem
+    echo "<h3>Błąd połączenia z Dyskiem Google</h3>";
+    echo "Kod błędu HTTP: " . $httpCode . "<br>";
+    echo "Upewnij się, że plik na Dysku ma ustawione uprawnienia: <b>'Każdy mający link może wyświetlać'</b>.";
+}
