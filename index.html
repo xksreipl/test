@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>Interaktywna Mapa - Bez Scrollowania 🦆</title>
+    <style>
+        /* Blokada scrollowania i ustawienie kaczki na całą stronę */
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden; /* Wyłącza paski przewijania */
+            background-color: #ffeef2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-family: 'Arial', sans-serif;
+            /* Główny kursor kaczka */
+            cursor: url('https://img.icons8.com/emoji/32/duck-emoji.png'), auto !important;
+        }
+
+        h1 { 
+            color: #d63384; 
+            font-size: 1.8em; 
+            margin: 10px 0; 
+            flex-shrink: 0; 
+        }
+
+        .main-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            width: 98vw;
+            height: calc(100vh - 80px); /* Dopasowanie do wysokości okna minus nagłówek */
+            box-sizing: border-box;
+        }
+
+        .side-column {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            width: 280px;
+            height: 100%;
+            justify-content: center;
+        }
+
+        .main-image-container {
+            border: 10px solid white;
+            box-shadow: 0 15px 45px rgba(214, 51, 132, 0.3);
+            line-height: 0;
+            max-width: 650px; /* Zmniejszone, by zmieścić się bez scrolla */
+            max-height: 80vh;
+            flex-shrink: 0;
+            border-radius: 10px;
+        }
+
+        #main-pic { 
+            width: 100%; 
+            height: auto; 
+            max-height: 80vh;
+            display: block; 
+        }
+
+        .gallery-img {
+            width: 260px;
+            height: 200px;
+            object-fit: cover;
+            border: 6px solid white;
+            border-radius: 15px;
+            display: none;
+            opacity: 0;
+            cursor: url('https://img.icons8.com/emoji/32/duck-emoji.png'), auto !important;
+            transform: scale(0.8);
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .visible { display: block; opacity: 1; transform: scale(1); }
+
+        /* Wymuszenie kaczki na strefach klikalnych */
+        area { 
+            cursor: url('https://img.icons8.com/emoji/32/duck-emoji.png'), auto !important; 
+        }
+
+        /* Lightbox */
+        #lightbox {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            justify-content: center;
+            align-items: center;
+            cursor: url('https://img.icons8.com/emoji/32/duck-emoji.png'), auto !important;
+        }
+
+        #lightbox img {
+            max-width: 90%;
+            max-height: 90%;
+            border: 8px solid white;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Interaktywne obiekty 🦆</h1>
+
+<div class="main-wrapper">
+    <div class="side-column">
+        <script>
+            for(let i=1; i<=14; i++) {
+                document.write(`<img src="img${i}_1.jpg" class="gallery-img g${i}" onclick="openLightbox(this.src)">`);
+                document.write(`<img src="img${i}_2.jpg" class="gallery-img g${i}" onclick="openLightbox(this.src)">`);
+            }
+        </script>
+    </div>
+
+    <div class="main-image-container">
+        <img src="glowne.jpg" usemap="#image-map" id="main-pic">
+        <map name="image-map">
+            <area alt="1" coords="399,29,157,173" shape="rect" onclick="showZone('g1', 's1')">
+            <area alt="2" coords="270,349,438,437" shape="rect" onclick="showZone('g2', 's2')">
+            <area alt="3" coords="0,185,236,423" shape="rect" onclick="showZone('g3', 's3')">
+            <area alt="4" coords="741,487,1024,209" shape="rect" onclick="showZone('g4', 's4')">
+            <area alt="5" coords="392,438,663,598" shape="rect" onclick="showZone('g5', 's5')">
+            <area alt="6" coords="213,437,319,578" shape="rect" onclick="showZone('g6', 's6')">
+            <area alt="7" coords="463,741,459,599,229,594,218,548,161,480,100,577,14,601,5,660,111,662,119,740" shape="poly" onclick="showZone('g7', 's7')">
+            <area alt="8" coords="713,486,1018,487,1014,576,905,560,877,622,737,650,703,621,677,576,692,505" shape="poly" onclick="showZone('g8', 's8')">
+            <area alt="9" coords="618,649,616,748,698,783,812,785,1004,782,1019,782,1018,601,948,558,910,600,858,636,778,648,690,659,666,637" shape="poly" onclick="showZone('g9', 's9')">
+            <area alt="10" coords="2,907,775,901,777,1006,1,1003" shape="poly" onclick="showZone('g10', 's10')">
+            <area alt="11" coords="50,669,102,667,136,780,184,776,202,838,29,869,0,869,42,685,50,676,47,678,6,853,2,724" shape="poly" onclick="showZone('g11', 's11')">
+            <area alt="12" coords="321,769,592,729,633,758,752,787,878,791,883,887,325,897" shape="poly" onclick="showZone('g12', 's12')">
+            <area alt="13" coords="899,844,891,893,1019,895,1017,849" shape="poly" onclick="showZone('g13', 's13')">
+            <area alt="14" coords="531,256,485,413,587,441,643,243" shape="poly" onclick="showZone('g14', 's14')">
+        </map>
+    </div>
+
+    <div class="side-column">
+        <script>
+            for(let i=1; i<=14; i++) {
+                document.write(`<img src="img${i}_3.jpg" class="gallery-img g${i}" onclick="openLightbox(this.src)">`);
+                document.write(`<img src="img${i}_4.jpg" class="gallery-img g${i}" onclick="openLightbox(this.src)">`);
+            }
+        </script>
+    </div>
+</div>
+
+<div id="lightbox" onclick="this.style.display='none'">
+    <img id="lightbox-img" src="">
+</div>
+
+<script>
+    for(let i=1; i<=14; i++) {
+        document.write(`<audio id="s${i}" src="dzwiek${i}.mp3"></audio>`);
+    }
+</script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/image-map-resizer/1.0.10/js/imageMapResizer.min.js"></script>
+<script>
+    function showZone(group, soundId) {
+        const sound = document.getElementById(soundId);
+        if(sound) { sound.currentTime = 0; sound.play(); }
+        document.querySelectorAll('.gallery-img').forEach(img => img.classList.remove('visible'));
+        document.querySelectorAll('.' + group).forEach((img, i) => {
+            setTimeout(() => img.classList.add('visible'), i * 80);
+        });
+    }
+
+    function openLightbox(src) {
+        const lb = document.getElementById('lightbox');
+        const lbImg = document.getElementById('lightbox-img');
+        lbImg.src = src;
+        lb.style.display = 'flex';
+    }
+
+    window.onload = function() { imageMapResize(); };
+</script>
+
+</body>
+</html>
