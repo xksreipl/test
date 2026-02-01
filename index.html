@@ -1,205 +1,34 @@
-<!DOCTYPE html>
-<html lang="pl">
-<head>
-    <meta charset="UTF-8">
-    <title>Walentynkowa Interakcja 🦆❤️</title>
-    <style>
-        /* Styl blokady hasłem */
-        #password-overlay {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: #fff0f3;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 99999;
-            font-family: 'Segoe UI', sans-serif;
-            cursor: default !important;
-        }
+<?php
+/**
+ * Skrypt pobierający kod strony z Google Drive i wyświetlający go.
+ * Pamiętaj, aby plik na dysku miał uprawnienia: "Każdy mający link może wyświetlać".
+ */
 
-        #password-overlay input {
-            padding: 15px;
-            font-size: 1.2em;
-            border: 3px solid #ff4d6d;
-            border-radius: 15px;
-            outline: none;
-            text-align: center;
-            margin-bottom: 10px;
-        }
+// Twoje ID pliku z linku
+$fileId = '1pEI29GoFQdwzm9O8_FXthbnGpvwaSFRI';
 
-        #password-overlay button {
-            padding: 10px 25px;
-            background: #ff4d6d;
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
+// Link do bezpośredniego pobierania (omija podgląd Drive)
+$url = "https://docs.google.com/uc?export=download&id=" . $fileId;
 
-        #password-overlay button:hover {
-            background: #ff758f;
-        }
+// Inicjalizacja cURL dla stabilnego połączenia
+$ch = curl_init();
+curl_setopt($ch, CURLOPT_URL, $url);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true); // Pozwala na przekierowania Google
+curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); // Omija ewentualne problemy z certyfikatem SSL na niektórych serwerach
+curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36');
 
-        /* Styl strony głównej */
-        body {
-            background-color: #fff0f3;
-            text-align: center;
-            font-family: 'Segoe UI', Arial, sans-serif;
-            margin: 0;
-            padding: 10px;
-            zoom: 0.9;
-            cursor: url('https://img.icons8.com/emoji/32/duck-emoji.png'), auto !important;
-            overflow-x: hidden;
-            min-height: 100vh;
-        }
+$remoteCode = curl_exec($ch);
+$httpCode = curl_getinfo($ch, HTTP_CODE);
+curl_close($ch);
 
-        .main-wrapper { display: flex; justify-content: center; align-items: flex-start; gap: 40px; margin-top: 20px; }
-        .side-column { display: flex; flex-direction: column; gap: 20px; width: 320px; }
-        .main-image-container { border: 12px solid white; box-shadow: 0 15px 45px rgba(255, 77, 109, 0.2); line-height: 0; max-width: 950px; border-radius: 20px; background: white; position: relative; }
-        #main-pic { width: 100%; height: auto; display: block; border-radius: 10px; }
-        
-        .gallery-img { 
-            width: 300px; height: 250px; object-fit: cover; border: 8px solid white; border-radius: 25px; 
-            display: none; opacity: 0; transform: scale(0.9); transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
-            box-shadow: 0 8px 25px rgba(255, 77, 109, 0.2); 
-            cursor: url('https://img.icons8.com/color/32/help--v1.png'), auto !important; 
-        }
-        .visible { display: block; opacity: 1; transform: scale(1); }
-        .gallery-img:hover { transform: scale(1.05) rotate(2deg); border-color: #ff4d6d; }
-        
-        area { cursor: url('https://img.icons8.com/color/32/help--v1.png'), auto !important; }
-
-        /* Serduszka */
-        .heart-particle { position: fixed; pointer-events: none; z-index: 9999; font-size: 24px; animation: heartLife 1.2s ease-out forwards; }
-        @keyframes heartLife { 0% { transform: translate(0, 0) scale(0.5); opacity: 1; } 100% { transform: translate(var(--mx), var(--my)) scale(1.2); opacity: 0; } }
-
-        #lightbox { display: none; position: fixed; z-index: 1000; top: 0; left: 0; width: 100%; height: 100%; background: rgba(45, 0, 15, 0.9); justify-content: center; align-items: center; }
-        #lightbox img { max-width: 95%; max-height: 95%; border: 10px solid white; border-radius: 10px; }
-    </style>
-</head>
-<body onclick="createHeartRain(event)">
-
-    <div id="password-overlay">
-        <h2 style="color: #ff4d6d;">Dostęp tylko dla wtajemniczonych 🦆</h2>
-        <input type="password" id="pass-input" placeholder="Podaj kod..." onkeypress="if(event.key === 'Enter') checkPassword()">
-        <button onclick="checkPassword()">Otwórz serce ❤️</button>
-        <p id="error-msg" style="color: red; display: none; margin-top: 10px;">Błędne hasło!</p>
-    </div>
-
-    <div class="main-wrapper">
-        <div class="side-column">
-            <script>
-                for(let i=1; i<=14; i++) {
-                    document.write(`<img src="img${i}_1.jpg" class="gallery-img g${i}" onclick="openLightbox(this.src)">`);
-                    document.write(`<img src="img${i}_2.jpg" class="gallery-img g${i}" onclick="openLightbox(this.src)">`);
-                }
-            </script>
-        </div>
-
-        <div class="main-image-container">
-            <img src="glowne.jpg" usemap="#image-map" id="main-pic">
-            <map name="image-map">
-                <area alt="1" coords="399,29,157,173" shape="rect" onclick="handleInteraction('g1', 's1')">
-                <area alt="2" coords="270,349,438,437" shape="rect" onclick="handleInteraction('g2', 's2')">
-                <area alt="3" coords="0,185,236,423" shape="rect" onclick="handleInteraction('g3', 's3')">
-                <area alt="4" coords="741,487,1024,209" shape="rect" onclick="handleInteraction('g4', 's4')">
-                <area alt="5" coords="392,438,663,598" shape="rect" onclick="handleInteraction('g5', 's5')">
-                <area alt="6" coords="213,437,319,578" shape="rect" onclick="handleInteraction('g6', 's6')">
-                <area alt="7" coords="463,741,459,599,229,594,218,548,161,480,100,577,14,601,5,660,111,662,119,740" shape="poly" onclick="handleInteraction('g7', 's7')">
-                <area alt="8" coords="713,486,1018,487,1014,576,905,560,877,622,737,650,703,621,677,576,692,505" shape="poly" onclick="handleInteraction('g8', 's8')">
-                <area alt="9" coords="618,649,616,748,698,783,812,785,1004,782,1019,782,1018,601,948,558,910,600,858,636,778,648,690,659,666,637" shape="poly" onclick="handleInteraction('g9', 's9')">
-                <area alt="10" coords="2,907,775,901,777,1006,1,1003" shape="poly" onclick="handleInteraction('g10', 's10')">
-                <area alt="11" coords="50,669,102,667,136,780,184,776,202,838,29,869,0,869,42,685,50,676,47,678,6,853,2,724" shape="poly" onclick="handleInteraction('g11', 's11')">
-                <area alt="12" coords="321,769,592,729,633,758,752,787,878,791,883,887,325,897" shape="poly" onclick="handleInteraction('g12', 's12')">
-                <area alt="13" coords="899,844,891,893,1019,895,1017,849" shape="poly" onclick="handleInteraction('g13', 's13')">
-                <area alt="14" coords="531,256,485,413,587,441,643,243" shape="poly" onclick="handleInteraction('g14', 's14')">
-            </map>
-        </div>
-
-        <div class="side-column">
-            <script>
-                for(let i=1; i<=14; i++) {
-                    document.write(`<img src="img${i}_3.jpg" class="gallery-img g${i}" onclick="openLightbox(this.src)">`);
-                    document.write(`<img src="img${i}_4.jpg" class="gallery-img g${i}" onclick="openLightbox(this.src)">`);
-                }
-            </script>
-        </div>
-    </div>
-
-    <div id="lightbox" onclick="this.style.display='none'"><img id="lightbox-img"></div>
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/image-map-resizer/1.0.10/imageMapResizer.min.js"></script>
-    <script>
-        // FUNKCJA MASKUJĄCA HASŁO (SHA-256)
-        async function sha256(message) {
-            const msgBuffer = new TextEncoder().encode(message);
-            const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
-            const hashArray = Array.from(new Uint8Array(hashBuffer));
-            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-        }
-
-        // ZAHASHOWANE HASŁO: Kr@tko123!
-        const secretHash = "35f992a83857508493014a51e626e274a4966b965f80b2d0733d7b322316e6f4";
-
-        async function checkPassword() {
-            const input = document.getElementById('pass-input').value;
-            const hashedInput = await sha256(input);
-            
-            if(hashedInput === secretHash) {
-                document.getElementById('password-overlay').style.display = 'none';
-            } else {
-                document.getElementById('error-msg').style.display = 'block';
-                document.getElementById('pass-input').value = "";
-            }
-        }
-
-        function createHeartRain(e) {
-            if(document.getElementById('password-overlay').style.display !== 'none') return;
-            const hearts = ['❤️', '💖', '💝', '💕', '💗'];
-            for (let i = 0; i < 12; i++) {
-                const heart = document.createElement('div');
-                heart.className = 'heart-particle';
-                heart.innerHTML = hearts[Math.floor(Math.random() * hearts.length)];
-                heart.style.left = e.clientX + 'px';
-                heart.style.top = e.clientY + 'px';
-                heart.style.setProperty('--mx', (Math.random() * 400 - 200) + 'px');
-                heart.style.setProperty('--my', (Math.random() * -400 - 50) + 'px');
-                document.body.appendChild(heart);
-                setTimeout(() => heart.remove(), 1200);
-            }
-        }
-
-        function handleInteraction(group, soundId) {
-            const sound = document.getElementById(soundId);
-            if(sound) { 
-                sound.currentTime = 0; 
-                sound.play().catch(e => console.log("Interakcja wymagana do dźwięku")); 
-            }
-            document.querySelectorAll('.gallery-img').forEach(img => img.classList.remove('visible'));
-            document.querySelectorAll('.' + group).forEach((img, i) => {
-                setTimeout(() => img.classList.add('visible'), i * 80);
-            });
-        }
-
-        function openLightbox(src) {
-            const lb = document.getElementById('lightbox');
-            document.getElementById('lightbox-img').src = src;
-            lb.style.display = 'flex';
-        }
-
-        window.onload = () => { 
-            if(typeof imageMapResize === 'function') imageMapResize(); 
-        };
-
-        // Dodanie audio
-        for(let i=1; i<=14; i++) {
-            let a = document.createElement('audio');
-            a.id = `s${i}`; a.src = `dzwiek${i}.mp3`;
-            document.body.appendChild(a);
-        }
-    </script>
-</body>
-</html>
+// Sprawdzanie, czy pobieranie się powiodło
+if ($httpCode == 200 && $remoteCode !== false) {
+    // Wyświetla kod HTML/JS/CSS pobrany z dysku
+    echo $remoteCode;
+} else {
+    // Komunikat o błędzie w przypadku problemów z dostępem
+    echo "<h3>Błąd połączenia z Dyskiem Google</h3>";
+    echo "Kod błędu HTTP: " . $httpCode . "<br>";
+    echo "Upewnij się, że plik na Dysku ma ustawione uprawnienia: <b>'Każdy mający link może wyświetlać'</b>.";
+}
